@@ -1,24 +1,25 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import circleImage from '../../asset/circle.png';
 
 export interface VueEffectLink {
-  label: string
-  href: string
+  label: string;
+  href: string;
 }
 
 const props = withDefaults(
   defineProps<{
-    title?: string
-    description?: string
-    homeHref?: string
-    links?: VueEffectLink[]
-    socialLinks?: VueEffectLink[]
-    timezone?: string
-    activeHref?: string
-    defaultOpen?: boolean
-    showIntro?: boolean
-    showThemeToggle?: boolean
-    collapseOnScroll?: boolean
+    title?: string;
+    description?: string;
+    homeHref?: string;
+    links?: VueEffectLink[];
+    socialLinks?: VueEffectLink[];
+    timezone?: string;
+    activeHref?: string;
+    defaultOpen?: boolean;
+    showIntro?: boolean;
+    showThemeToggle?: boolean;
+    collapseOnScroll?: boolean;
   }>(),
   {
     title: 'Local Remote',
@@ -29,31 +30,36 @@ const props = withDefaults(
       { label: 'Projects', href: '/projects' },
       { label: 'Fragments', href: '/fragments' },
       { label: 'News', href: '/news' },
-      { label: 'About', href: '/about' }
+      { label: 'About', href: '/about' },
     ],
     socialLinks: () => [
       { label: 'Instagram', href: 'https://www.instagram.com/local.remote' },
-      { label: 'Facebook', href: 'https://www.facebook.com/local.remotedesign' }
+      {
+        label: 'Facebook',
+        href: 'https://www.facebook.com/local.remotedesign',
+      },
     ],
     timezone: 'Asia/Taipei',
     activeHref: '',
     defaultOpen: false,
     showIntro: true,
     showThemeToggle: true,
-    collapseOnScroll: true
+    collapseOnScroll: true,
   }
-)
+);
 
-const isOpen = ref(props.defaultOpen)
-const isDark = ref(false)
-const displayLevel = ref(3)
-const scrollDirection = ref<'up' | 'down'>('up')
-const currentHref = ref('')
-const now = ref(new Date())
-let timer: number | undefined
-let lastScrollY = 0
-let accumulatedDelta = 0
-let frame = 0
+const isOpen = ref(props.defaultOpen);
+const isCustomiserOpen = ref(false);
+const displayLevel = ref(3);
+const isHome = ref(isHomeLocation());
+const scrollDirection = ref<'up' | 'down'>('up');
+const currentHref = ref('');
+const now = ref(new Date());
+const customiserStorageKey = 'vue-effect:customiser-open';
+let timer: number | undefined;
+let lastScrollY = 0;
+let accumulatedDelta = 0;
+let frame = 0;
 
 const formattedTime = computed(() => {
   const formatter = new Intl.DateTimeFormat('en-US', {
@@ -61,127 +67,173 @@ const formattedTime = computed(() => {
     minute: '2-digit',
     hour12: true,
     timeZone: props.timezone,
-    timeZoneName: 'shortOffset'
-  })
+    timeZoneName: 'shortOffset',
+  });
 
-  return formatter.format(now.value).replace('AM', 'AM').replace('PM', 'PM')
-})
+  return formatter.format(now.value).replace('AM', 'AM').replace('PM', 'PM');
+});
 
 const rootClasses = computed(() => [
   `vue-effect--level-${displayLevel.value}`,
   `vue-effect--scroll-${scrollDirection.value}`,
   {
     'vue-effect--open': isOpen.value,
-    'vue-effect--dark': isDark.value
-  }
-])
+    'vue-effect--customising': isCustomiserOpen.value,
+  },
+]);
 
-const activeTarget = computed(() => props.activeHref || currentHref.value)
+const activeTarget = computed(() => props.activeHref || currentHref.value);
 
 function getCurrentHref() {
-  if (typeof window === 'undefined') return ''
-  return window.location.hash || window.location.pathname
+  if (typeof window === 'undefined') return '';
+  return window.location.hash || window.location.pathname;
 }
 
 function normalizeHref(href: string) {
-  if (href.startsWith('#')) return href
+  if (href.startsWith('#')) return href;
 
   try {
-    const url = new URL(href, window.location.origin)
-    return url.hash || url.pathname
+    const url = new URL(href, window.location.origin);
+    return url.hash || url.pathname;
   } catch {
-    return href
+    return href;
   }
 }
 
 function isActiveLink(href: string) {
-  return normalizeHref(href) === normalizeHref(activeTarget.value)
+  return normalizeHref(href) === normalizeHref(activeTarget.value);
 }
 
 function isHomeLocation() {
-  if (typeof window === 'undefined') return true
-  return !window.location.hash && window.location.pathname === '/'
+  if (typeof window === 'undefined') return true;
+  return !window.location.hash && window.location.pathname === '/';
 }
 
 function setDisplayLevel(nextLevel: number) {
-  displayLevel.value = isHomeLocation() ? nextLevel : Math.min(nextLevel, 2)
+  const resolvedLevel = isHomeLocation() ? nextLevel : Math.min(nextLevel, 2);
+  displayLevel.value = resolvedLevel;
 }
 
 function updateCurrentHref() {
-  currentHref.value = getCurrentHref()
-  setDisplayLevel(displayLevel.value)
+  currentHref.value = getCurrentHref();
+  isHome.value = isHomeLocation();
+  setDisplayLevel(displayLevel.value);
 }
 
 function onLinkClick(event: MouseEvent, href: string) {
   if (!props.activeHref) {
-    currentHref.value = normalizeHref(href)
+    currentHref.value = normalizeHref(href);
   }
 
-  if (!href.startsWith('#')) return
+  if (!href.startsWith('#')) return;
 
-  const target = document.querySelector(href)
-  if (!target) return
+  const target = document.querySelector(href);
+  if (!target) return;
 
-  event.preventDefault()
-  window.history.pushState(null, '', href)
-  setDisplayLevel(displayLevel.value)
-  target.scrollIntoView({ block: 'start', behavior: 'smooth' })
+  event.preventDefault();
+  window.history.pushState(null, '', href);
+  setDisplayLevel(displayLevel.value);
+  target.scrollIntoView({ block: 'start', behavior: 'smooth' });
 }
 
 function updateScrollState() {
-  const currentY = window.scrollY
-  const delta = currentY - lastScrollY
-  accumulatedDelta += delta
+  const currentY = window.scrollY;
+  const delta = currentY - lastScrollY;
+  accumulatedDelta += delta;
 
   if (currentY <= 24) {
-    scrollDirection.value = 'up'
-    setDisplayLevel(3)
-    accumulatedDelta = 0
+    scrollDirection.value = 'up';
+    setDisplayLevel(3);
+    accumulatedDelta = 0;
   } else if (accumulatedDelta > 18) {
-    scrollDirection.value = 'down'
-    setDisplayLevel(1)
-    accumulatedDelta = 0
+    scrollDirection.value = 'down';
+    setDisplayLevel(1);
+    accumulatedDelta = 0;
   } else if (accumulatedDelta < -18) {
-    scrollDirection.value = 'up'
-    setDisplayLevel(2)
-    accumulatedDelta = 0
+    scrollDirection.value = 'up';
+    setDisplayLevel(2);
+    accumulatedDelta = 0;
   }
 
-  lastScrollY = currentY
-  frame = 0
+  lastScrollY = currentY;
+  frame = 0;
 }
 
 function onScroll() {
-  if (!props.collapseOnScroll || frame) return
-  frame = window.requestAnimationFrame(updateScrollState)
+  if (!props.collapseOnScroll || frame) return;
+  frame = window.requestAnimationFrame(updateScrollState);
+}
+
+function readStoredCustomiserState() {
+  try {
+    isCustomiserOpen.value =
+      window.localStorage.getItem(customiserStorageKey) === 'true';
+  } catch {
+    isCustomiserOpen.value = false;
+  }
+}
+
+function writeStoredCustomiserState() {
+  try {
+    window.localStorage.setItem(
+      customiserStorageKey,
+      String(isCustomiserOpen.value)
+    );
+  } catch {
+    // Ignore storage errors from private browsing or restricted embeds.
+  }
+}
+
+function toggleCustomiser() {
+  isCustomiserOpen.value = !isCustomiserOpen.value;
+  writeStoredCustomiserState();
 }
 
 onMounted(() => {
-  updateCurrentHref()
-  lastScrollY = window.scrollY
-  setDisplayLevel(lastScrollY <= 24 ? 3 : 2)
+  readStoredCustomiserState();
+  updateCurrentHref();
+  lastScrollY = window.scrollY;
+  setDisplayLevel(lastScrollY <= 24 ? 3 : 2);
 
   timer = window.setInterval(() => {
-    now.value = new Date()
-  }, 30_000)
+    now.value = new Date();
+  }, 30_000);
 
-  window.addEventListener('scroll', onScroll, { passive: true })
-  window.addEventListener('hashchange', updateCurrentHref)
-  window.addEventListener('popstate', updateCurrentHref)
-})
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('hashchange', updateCurrentHref);
+  window.addEventListener('popstate', updateCurrentHref);
+});
 
 onBeforeUnmount(() => {
-  if (timer) window.clearInterval(timer)
-  if (frame) window.cancelAnimationFrame(frame)
-  window.removeEventListener('scroll', onScroll)
-  window.removeEventListener('hashchange', updateCurrentHref)
-  window.removeEventListener('popstate', updateCurrentHref)
-})
+  if (timer) window.clearInterval(timer);
+  if (frame) window.cancelAnimationFrame(frame);
+  window.removeEventListener('scroll', onScroll);
+  window.removeEventListener('hashchange', updateCurrentHref);
+  window.removeEventListener('popstate', updateCurrentHref);
+});
 </script>
 
 <template>
   <aside class="vue-effect" :class="rootClasses">
-    <section v-if="showIntro" class="vue-effect__intro" aria-label="Introduction" :aria-hidden="displayLevel < 3">
+    <section
+      v-if="showThemeToggle"
+      class="vue-effect__customiser"
+      aria-label="Customiser"
+      :aria-hidden="!isCustomiserOpen || displayLevel < 3"
+    >
+      <img
+        class="vue-effect__customiser-graphic"
+        :src="circleImage"
+        alt="Text and radius controls"
+      />
+    </section>
+
+    <section
+      v-if="showIntro"
+      class="vue-effect__intro"
+      aria-label="Introduction"
+      :aria-hidden="displayLevel < 3"
+    >
       <h2>We are {{ title }}.</h2>
       <p>{{ description }}</p>
     </section>
@@ -202,12 +254,12 @@ onBeforeUnmount(() => {
         <a class="vue-effect__brand" :href="homeHref">{{ title }}</a>
 
         <button
-          v-if="showThemeToggle"
+          v-if="showThemeToggle && isHome"
           class="vue-effect__switch vue-effect__switch--mobile"
           type="button"
-          :aria-pressed="isDark"
-          aria-label="Toggle theme"
-          @click="isDark = !isDark"
+          :aria-pressed="isCustomiserOpen"
+          aria-label="Toggle customiser"
+          @click="toggleCustomiser"
         >
           <span></span>
         </button>
@@ -237,17 +289,23 @@ onBeforeUnmount(() => {
 
     <footer class="vue-effect__footer" :aria-hidden="displayLevel < 2">
       <span class="vue-effect__time">{{ formattedTime }}</span>
-      <a v-for="link in socialLinks" :key="link.href" :href="link.href" target="_blank" rel="noreferrer">
+      <a
+        v-for="link in socialLinks"
+        :key="link.href"
+        :href="link.href"
+        target="_blank"
+        rel="noreferrer"
+      >
         {{ link.label }}
       </a>
 
       <button
-        v-if="showThemeToggle"
+        v-if="showThemeToggle && isHome"
         class="vue-effect__switch vue-effect__switch--desktop"
         type="button"
-        :aria-pressed="isDark"
-        aria-label="Toggle theme"
-        @click="isDark = !isDark"
+        :aria-pressed="isCustomiserOpen"
+        aria-label="Toggle customiser"
+        @click="toggleCustomiser"
       >
         <span></span>
       </button>

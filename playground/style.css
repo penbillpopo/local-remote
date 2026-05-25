@@ -28,6 +28,32 @@ body {
   background-size: cover, cover, cover, auto;
 }
 
+.playground-hero--dark {
+  color: #f7f7f7;
+  background:
+    radial-gradient(circle at 18% 24%, rgba(255, 255, 255, 0.18), transparent 28%),
+    linear-gradient(135deg, #111111, #34363a);
+}
+
+.playground-hero--pink {
+  color: #191919;
+  background:
+    repeating-linear-gradient(0deg, rgba(255, 115, 150, 0.22) 0 4px, transparent 4px 8px),
+    #ffd9e2;
+}
+
+.playground-hero--black {
+  color: #f7f7f7;
+  background:
+    radial-gradient(circle at 70% 18%, rgba(255, 216, 76, 0.24), transparent 30%),
+    #101010;
+}
+
+.playground-hero--light {
+  color: #191919;
+  background: #f8f8f8;
+}
+
 .playground-hero p {
   margin: 0 0 8px;
   font-size: 14px;
