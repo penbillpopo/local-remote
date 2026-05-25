@@ -23,6 +23,7 @@
   "scripts": {
     "dev": "vite --host 0.0.0.0",
     "build": "vue-tsc --noEmit && vite build",
+    "build:playground": "vite build --config vite.config.playground.ts",
     "typecheck": "vue-tsc --noEmit",
     "preview": "vite preview --host 0.0.0.0",
     "prepublishOnly": "npm run build"
