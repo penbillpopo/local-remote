@@ -1,0 +1,500 @@
+.vue-effect {
+  --ve-bg: #ecedef;
+  --ve-panel: #ffffff;
+  --ve-text: #1d1d1d;
+  --ve-muted: #535353;
+  --ve-hover: #ecedef;
+  --ve-radius: 8px;
+  --ve-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --ve-ease-collapse: cubic-bezier(0.76, 0, 0.24, 1);
+  --ve-duration: 520ms;
+  --ve-duration-fast: 360ms;
+  position: fixed;
+  left: 18px;
+  bottom: 18px;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  width: 414px;
+  color: var(--ve-text);
+  filter: drop-shadow(0 0 6px rgba(0, 0, 0, 0.05));
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.vue-effect--dark {
+  --ve-bg: #181818;
+  --ve-panel: #3a3a3a;
+  --ve-text: #ffffff;
+  --ve-muted: #c0c0c0;
+  --ve-hover: #181818;
+}
+
+.vue-effect *,
+.vue-effect *::before,
+.vue-effect *::after {
+  box-sizing: border-box;
+}
+
+.vue-effect a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.vue-effect__intro,
+.vue-effect__panel,
+.vue-effect__footer {
+  background: var(--ve-panel);
+  will-change: max-height, transform, opacity;
+  transition:
+    max-height var(--ve-duration) var(--ve-ease),
+    margin var(--ve-duration) var(--ve-ease),
+    padding var(--ve-duration) var(--ve-ease),
+    background-color 180ms ease,
+    color 180ms ease,
+    transform var(--ve-duration) var(--ve-ease),
+    opacity var(--ve-duration-fast) ease,
+    filter var(--ve-duration-fast) ease;
+}
+
+.vue-effect__intro {
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 1px);
+  z-index: 0;
+  width: 100%;
+  max-height: 210px;
+  margin-bottom: 1px;
+  padding: 16px 16px 24px;
+  border-radius: var(--ve-radius);
+  overflow: hidden;
+  opacity: 1;
+  filter: blur(0);
+  transform: translateY(0);
+  transform-origin: bottom;
+  pointer-events: auto;
+  transition-delay: 90ms;
+}
+
+.vue-effect__intro h2 {
+  margin: 0 0 16px;
+  font-size: 20px;
+  font-weight: 650;
+  line-height: 1.1;
+  letter-spacing: 0;
+}
+
+.vue-effect__intro p {
+  max-width: 34ch;
+  margin: 0;
+  color: var(--ve-muted);
+  font-size: 16px;
+  line-height: 1.2;
+  letter-spacing: 0;
+}
+
+.vue-effect__panel {
+  position: relative;
+  z-index: 2;
+  overflow: hidden;
+  border-radius: var(--ve-radius);
+  transform: translateY(0);
+  transition:
+    border-radius var(--ve-duration-fast) var(--ve-ease),
+    background-color 180ms ease,
+    transform var(--ve-duration) var(--ve-ease);
+}
+
+.vue-effect__top {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 70px;
+  padding: 22px 16px 20px;
+}
+
+.vue-effect__brand {
+  padding-left: 6px;
+  font-size: 22px;
+  font-weight: 650;
+  line-height: 1;
+}
+
+.vue-effect__mark {
+  display: inline-flex;
+  color: var(--ve-text);
+}
+
+.vue-effect__mark svg {
+  display: block;
+  fill: currentColor;
+}
+
+.vue-effect__burger {
+  display: none;
+  width: 18px;
+  height: 18px;
+  padding: 4px;
+  border: 0;
+  color: var(--ve-text);
+  background: transparent;
+  cursor: pointer;
+}
+
+.vue-effect__burger span {
+  display: block;
+  width: 11px;
+  height: 1px;
+  background: currentColor;
+  transition: transform 220ms ease, translate 220ms ease;
+}
+
+.vue-effect__burger span + span {
+  margin-top: 6px;
+}
+
+.vue-effect--open .vue-effect__burger span:first-child {
+  translate: 0 3.5px;
+  transform: rotate(45deg) scaleX(1.2);
+}
+
+.vue-effect--open .vue-effect__burger span:last-child {
+  translate: 0 -3.5px;
+  transform: rotate(-45deg) scaleX(1.2);
+}
+
+.vue-effect__links {
+  display: flex;
+  gap: 8px;
+  max-height: 48px;
+  padding: 0 16px 16px;
+  overflow: hidden;
+  opacity: 1;
+  filter: blur(0);
+  transform: translateY(0);
+  transform-origin: top;
+  transition:
+    max-height var(--ve-duration-fast) var(--ve-ease),
+    padding var(--ve-duration-fast) var(--ve-ease),
+    opacity 280ms ease,
+    transform var(--ve-duration-fast) var(--ve-ease),
+    filter 280ms ease;
+  transition-delay: 45ms;
+}
+
+.vue-effect__links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 6px;
+  border-radius: 4px;
+  font-size: 16px;
+  font-weight: 650;
+  line-height: 1;
+  transition: background-color 180ms ease;
+}
+
+.vue-effect__links a:hover,
+.vue-effect__link--active {
+  background: var(--ve-hover);
+}
+
+.vue-effect__footer {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-height: 52px;
+  min-height: 36px;
+  margin-top: 1px;
+  padding: 8px 16px;
+  border-radius: var(--ve-radius);
+  overflow: hidden;
+  opacity: 1;
+  filter: blur(0);
+  transform: none;
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1;
+  transition-delay: 0ms;
+}
+
+.vue-effect--level-1 .vue-effect__intro,
+.vue-effect--level-2 .vue-effect__intro {
+  max-height: 210px;
+  margin-bottom: 1px;
+  padding: 16px 16px 24px;
+  opacity: 0;
+  filter: blur(1px);
+  transform: translateY(72px) scale(0.985);
+  pointer-events: none;
+  transition-delay: 0ms;
+}
+
+.vue-effect--level-1 .vue-effect__links {
+  max-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  opacity: 0;
+  filter: blur(2px);
+  pointer-events: none;
+  transition-delay: 55ms;
+}
+
+.vue-effect--level-1 .vue-effect__panel {
+  border-radius: var(--ve-radius);
+  transform: translateY(37px);
+}
+
+.vue-effect--level-1 .vue-effect__footer {
+  pointer-events: none;
+}
+
+.vue-effect--scroll-up .vue-effect__links {
+  transform: translateY(0);
+}
+
+.vue-effect--scroll-down.vue-effect--level-1 .vue-effect__links {
+  transform: translateY(16px) scale(0.985);
+}
+
+.vue-effect--scroll-up.vue-effect--level-1 .vue-effect__links {
+  transform: translateY(18px) scale(0.985);
+}
+
+.vue-effect--level-2 .vue-effect__links {
+  transition-delay: 35ms;
+}
+
+.vue-effect--level-2 .vue-effect__footer {
+  transition-delay: 0ms;
+}
+
+.vue-effect--level-3 .vue-effect__intro {
+  transition-delay: 85ms;
+}
+
+.vue-effect--level-3 .vue-effect__links {
+  transition-delay: 35ms;
+}
+
+.vue-effect--level-3 .vue-effect__footer {
+  transition-delay: 0ms;
+}
+
+.vue-effect__footer a:hover {
+  opacity: 0.6;
+}
+
+.vue-effect__time {
+  white-space: nowrap;
+}
+
+.vue-effect__switch {
+  display: inline-flex;
+  align-items: center;
+  width: 14px;
+  height: 8px;
+  margin-left: auto;
+  padding: 0;
+  border: 0;
+  border-radius: 2px;
+  background: #c0c0c0;
+  cursor: pointer;
+  transition: background-color 180ms ease;
+}
+
+.vue-effect__switch span {
+  width: 5px;
+  height: 6px;
+  margin-left: 1px;
+  border-radius: 1px;
+  background: var(--ve-panel);
+  transition: transform 180ms ease, background-color 180ms ease;
+}
+
+.vue-effect__switch[aria-pressed="true"] {
+  background: #747474;
+}
+
+.vue-effect__switch[aria-pressed="true"] span {
+  transform: translateX(7px);
+}
+
+.vue-effect__switch--mobile {
+  display: none;
+}
+
+@media (max-width: 550px) {
+  .vue-effect {
+    top: 16px;
+    left: 50%;
+    bottom: auto;
+    display: block;
+    width: min(314px, calc(100vw - 32px));
+    height: auto;
+    padding-top: 0;
+    transform: translateX(-50%);
+    pointer-events: none;
+  }
+
+  .vue-effect__intro {
+    display: none;
+  }
+
+  .vue-effect__panel {
+    width: 100%;
+    height: fit-content;
+    border-radius: 6px;
+    pointer-events: auto;
+    transform: none !important;
+  }
+
+  .vue-effect__top {
+    display: grid;
+    grid-template-columns: 24px 1fr 24px;
+    min-height: 52px;
+    padding: 16px 18px;
+  }
+
+  .vue-effect__burger,
+  .vue-effect__switch--mobile {
+    display: inline-flex;
+  }
+
+  .vue-effect__burger {
+    position: relative;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 20px;
+    padding: 0;
+    overflow: visible;
+  }
+
+  .vue-effect__burger span {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 11px;
+    margin: 0;
+    translate: -50% -50%;
+    transform-origin: center;
+  }
+
+  .vue-effect__burger span + span {
+    margin-top: 0;
+    transform: none;
+  }
+
+  .vue-effect:not(.vue-effect--open) .vue-effect__burger span:first-child {
+    translate: -50% calc(-50% - 3px);
+  }
+
+  .vue-effect:not(.vue-effect--open) .vue-effect__burger span:last-child {
+    translate: -50% calc(-50% + 3px);
+  }
+
+  .vue-effect--open .vue-effect__burger span:first-child {
+    translate: -50% -50%;
+    transform: rotate(45deg) scaleX(1.2);
+  }
+
+  .vue-effect--open .vue-effect__burger span:last-child {
+    translate: -50% -50%;
+    transform: rotate(-45deg) scaleX(1.2);
+  }
+
+  .vue-effect__brand {
+    justify-self: center;
+    padding-left: 0;
+    font-size: 16px;
+  }
+
+  .vue-effect__mark,
+  .vue-effect__switch--desktop {
+    display: none;
+  }
+
+  .vue-effect__links {
+    justify-content: space-between;
+    max-height: 0;
+    padding: 0 12px;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-10px);
+    transition:
+      max-height var(--ve-duration-fast) var(--ve-ease),
+      padding var(--ve-duration-fast) var(--ve-ease),
+      opacity 280ms ease,
+      transform var(--ve-duration-fast) var(--ve-ease),
+      filter 280ms ease;
+  }
+
+  .vue-effect--open .vue-effect__links {
+    max-height: 64px;
+    padding: 12px 12px 16px;
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
+  .vue-effect--level-2 .vue-effect__links,
+  .vue-effect--level-3 .vue-effect__links {
+    max-height: 0;
+    padding: 0 12px;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-10px);
+  }
+
+  .vue-effect--open.vue-effect--level-2 .vue-effect__links,
+  .vue-effect--open.vue-effect--level-3 .vue-effect__links {
+    max-height: 64px;
+    padding: 12px 12px 16px;
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
+  .vue-effect__links a {
+    min-height: 24px;
+    padding: 6px;
+    border-radius: 4px;
+    font-size: 12px;
+  }
+
+  .vue-effect__switch {
+    justify-self: end;
+    width: 12px;
+    height: 6px;
+  }
+
+  .vue-effect__switch span {
+    width: 4px;
+    height: 4px;
+  }
+
+  .vue-effect__switch[aria-pressed="true"] span {
+    transform: translateX(6px);
+  }
+
+  .vue-effect__footer {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vue-effect__intro,
+  .vue-effect__panel,
+  .vue-effect__links,
+  .vue-effect__footer,
+  .vue-effect__burger span,
+  .vue-effect__switch,
+  .vue-effect__switch span {
+    transition-duration: 1ms !important;
+    transition-delay: 0ms !important;
+  }
+}

@@ -1,0 +1,165 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  color: #18181b;
+  background: #ecedef;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.playground {
+  padding: 36px;
+}
+
+.playground-hero {
+  display: grid;
+  align-items: end;
+  min-height: 64vh;
+  padding: 32px;
+  border-radius: 8px;
+  color: #121212;
+  background:
+    linear-gradient(120deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.82)),
+    linear-gradient(160deg, transparent 0 45%, #f5f5f5 45% 100%),
+    linear-gradient(90deg, transparent 0 18%, #f4d900 18% 36%, transparent 36%),
+    #c9ccd1;
+  background-size: cover, cover, cover, auto;
+}
+
+.playground-hero p {
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.playground-hero h1 {
+  max-width: 720px;
+  margin: 0;
+  font-size: 52px;
+  font-weight: 650;
+  line-height: 1;
+}
+
+.playground-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+  margin-top: 22px;
+}
+
+.playground-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 62vh;
+  padding: 24px;
+  border-radius: 8px;
+  overflow: hidden;
+  color: #f7f7f7;
+  background:
+    radial-gradient(circle at 18% 24%, rgba(255, 255, 255, 0.18), transparent 28%),
+    linear-gradient(135deg, #111111, #34363a);
+}
+
+.playground-card:nth-child(2) {
+  color: #121212;
+  background:
+    linear-gradient(90deg, transparent 0 42%, rgba(255, 255, 255, 0.55) 42% 58%, transparent 58%),
+    linear-gradient(135deg, #ffd84c, #d8cf30);
+}
+
+.playground-card:nth-child(3) {
+  color: #121212;
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, 0.1) 0 36%, rgba(255, 255, 255, 0.7) 36% 100%),
+    #bfc4ca;
+}
+
+.playground-card:nth-child(4) {
+  background:
+    linear-gradient(135deg, rgba(236, 237, 239, 0.12), rgba(236, 237, 239, 0)),
+    #2c4458;
+}
+
+.playground-card p,
+.playground-band p {
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.playground-card h2,
+.playground-band h2 {
+  max-width: 720px;
+  margin: 0;
+  font-size: 42px;
+  font-weight: 650;
+  line-height: 1;
+}
+
+.playground-card span {
+  max-width: 360px;
+  font-size: 18px;
+  line-height: 1.25;
+}
+
+.playground-band {
+  display: grid;
+  align-content: end;
+  min-height: 92vh;
+  margin-top: 22px;
+  padding: 32px;
+  border-radius: 8px;
+}
+
+.playground-band--pink {
+  color: #191919;
+  background:
+    repeating-linear-gradient(0deg, rgba(255, 115, 150, 0.22) 0 4px, transparent 4px 8px),
+    #ffd9e2;
+}
+
+.playground-band--dark {
+  color: #f7f7f7;
+  background:
+    radial-gradient(circle at 70% 18%, rgba(255, 216, 76, 0.24), transparent 30%),
+    #101010;
+}
+
+.playground-band--light {
+  min-height: 80vh;
+  color: #191919;
+  background: #f8f8f8;
+}
+
+@media (max-width: 700px) {
+  .playground {
+    padding: 16px;
+  }
+
+  .playground-hero {
+    min-height: 70vh;
+    padding: 20px;
+  }
+
+  .playground-hero h1 {
+    font-size: 38px;
+  }
+
+  .playground-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .playground-card,
+  .playground-band {
+    min-height: 78vh;
+    padding: 20px;
+  }
+
+  .playground-card h2,
+  .playground-band h2 {
+    font-size: 32px;
+  }
+}
