@@ -106,7 +106,7 @@ function isActiveLink(href: string) {
 
 function isHomeLocation() {
   if (typeof window === 'undefined') return true;
-  return !window.location.hash && window.location.pathname === '/';
+  return !window.location.hash;
 }
 
 function setDisplayLevel(nextLevel: number) {

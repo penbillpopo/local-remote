@@ -1,46 +1,54 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { VueEffect } from '../src';
 import '../src/style.css';
 
 const links = [
-  { label: 'Projects', href: '/projects' },
-  { label: 'Fragments', href: '/fragments' },
-  { label: 'News', href: '/news' },
-  { label: 'About', href: '/about' },
+  { label: 'Projects', href: '#projects' },
+  { label: 'Fragments', href: '#fragments' },
+  { label: 'News', href: '#news' },
+  { label: 'About', href: '#about' },
 ];
 
 const pages = {
-  '/': {
+  '': {
     eyebrow: 'Vue library component',
     title: 'Floating navigation dock',
     tone: 'home',
   },
-  '/projects': {
+  '#projects': {
     eyebrow: 'Projects',
     title: 'Orbital identity system',
     tone: 'dark',
   },
-  '/fragments': {
+  '#fragments': {
     eyebrow: 'Fragments',
     title: 'Type motion archive',
     tone: 'pink',
   },
-  '/news': {
+  '#news': {
     eyebrow: 'News',
     title: 'A stage for generations',
     tone: 'black',
   },
-  '/about': {
+  '#about': {
     eyebrow: 'About',
     title: 'Physical and virtual presence',
     tone: 'light',
   },
 };
 
+const currentHash = ref(window.location.hash);
+
+function onHashChange() {
+  currentHash.value = window.location.hash;
+}
+
+onMounted(() => window.addEventListener('hashchange', onHashChange));
+onBeforeUnmount(() => window.removeEventListener('hashchange', onHashChange));
+
 const currentPage = computed(() => {
-  const path = window.location.pathname;
-  return pages[path as keyof typeof pages] ?? pages['/'];
+  return pages[currentHash.value as keyof typeof pages] ?? pages[''];
 });
 
 const cards = [
