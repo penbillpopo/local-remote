@@ -1,5 +1,13 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
+
+const onLine = ref<boolean | null>(null)
+
+watch(onLine, (val) => {
+  document.body.classList.toggle('theme-dark', val === true)
+  document.body.classList.toggle('theme-light', val === false)
+  dirty = true
+})
 
 const W = 340
 const H = 320
@@ -46,11 +54,20 @@ function onMouseDown(e: MouseEvent) {
   if (i >= 0) drag = { i, ox: mx - circles[i].x, oy: my - circles[i].y }
 }
 
+// 叉積方向判斷：(B-A) × (P-A) 的符號決定 P 在連線哪一側。
+// Canvas y 軸向下，故 cross < 0 = 視覺上方（true），cross > 0 = 視覺下方（false）。
+function checkOnLine() {
+  const A = circles[0], B = circles[1], P = circles[2]
+  const cross = (B.x - A.x) * (P.y - A.y) - (B.y - A.y) * (P.x - A.x)
+  onLine.value = cross < 0
+}
+
 function onMouseMove(e: MouseEvent) {
   if (!drag) return
   const [mx, my] = toCanvas(e.clientX, e.clientY)
   circles[drag.i].x = mx - drag.ox
   circles[drag.i].y = my - drag.oy
+  if (drag.i === 2) checkOnLine()
   dirty = true
 }
 
@@ -71,6 +88,7 @@ function onTouchMove(e: TouchEvent) {
   const [mx, my] = toCanvas(t.clientX, t.clientY)
   circles[drag.i].x = mx - drag.ox
   circles[drag.i].y = my - drag.oy
+  if (drag.i === 2) checkOnLine()
   dirty = true
 }
 
@@ -107,15 +125,16 @@ function draw() {
   const cvs = canvasRef.value
   if (!cvs) return
   const ctx = cvs.getContext('2d')!
+  const dark = onLine.value === true
 
   ctx.clearRect(0, 0, W, H)
-  ctx.fillStyle = '#ffffff'
+  ctx.fillStyle = dark ? '#0d0e12' : '#ffffff'
   ctx.fillRect(0, 0, W, H)
 
   // --- Layer 1: Three pairwise enclosing circles ---
   const pairs: [number, number][] = [[0, 1], [0, 2], [1, 2]]
   ctx.save()
-  ctx.strokeStyle = 'rgba(160,160,160,0.75)'
+  ctx.strokeStyle = dark ? 'rgba(255,255,255,0.13)' : 'rgba(0,0,0,0.13)'
   ctx.lineWidth = 1
   for (const [i, j] of pairs) {
     const enc = enclosingCircle(circles[i], circles[j])
@@ -133,9 +152,11 @@ function draw() {
     ctx.save()
     ctx.beginPath()
     ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2)
-    ctx.fillStyle = 'rgba(210,210,210,0.65)'
+    ctx.fillStyle = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'
     ctx.fill()
-    ctx.strokeStyle = active ? '#555' : '#999'
+    ctx.strokeStyle = active
+      ? (dark ? 'rgba(255,255,255,0.9)' : 'rgba(0,0,0,0.7)')
+      : (dark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.25)')
     ctx.lineWidth = 1.5
     ctx.stroke()
     ctx.restore()
@@ -143,7 +164,7 @@ function draw() {
     if (c.label) {
       ctx.save()
       ctx.font = '11px "Helvetica Neue", Helvetica, Arial, sans-serif'
-      ctx.fillStyle = '#555'
+      ctx.fillStyle = dark ? 'rgba(255,255,255,0.55)' : 'rgba(0,0,0,0.45)'
       ctx.textAlign = 'center'
       ctx.textBaseline = 'middle'
       ctx.fillText(c.label, c.x, c.y)
@@ -175,6 +196,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   cancelAnimationFrame(rafId)
+  document.body.classList.remove('theme-dark', 'theme-light')
   const cvs = canvasRef.value
   if (!cvs) return
   cvs.removeEventListener('mousedown', onMouseDown)
@@ -203,5 +225,19 @@ onBeforeUnmount(() => {
   cursor: crosshair;
   touch-action: none;
   user-select: none;
+}
+</style>
+
+<style>
+body {
+  transition: background-color 0.4s, color 0.4s;
+}
+body.theme-dark {
+  background-color: #0d0e12;
+  color: #e8eaf0;
+}
+body.theme-light {
+  background-color: #ffffff;
+  color: #0d0e12;
 }
 </style>
