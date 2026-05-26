@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
-import circleImage from '../../asset/circle.png';
+import ApolloCircles from './ApolloCircles.vue';
 
 export interface VueEffectLink {
   label: string;
@@ -221,11 +221,7 @@ onBeforeUnmount(() => {
       aria-label="Customiser"
       :aria-hidden="!isCustomiserOpen || displayLevel < 3"
     >
-      <img
-        class="vue-effect__customiser-graphic"
-        :src="circleImage"
-        alt="Text and radius controls"
-      />
+      <ApolloCircles class="vue-effect__customiser-graphic" />
     </section>
 
     <section
