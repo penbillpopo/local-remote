@@ -1,13 +1,47 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { onBeforeUnmount, onMounted, ref } from 'vue'
 
-const onLine = ref<boolean | null>(null)
+// 背景亮度 0=黑 128=灰 255=白，驅動 body 背景色與 canvas 底色
+let currentBg = 255
 
-watch(onLine, (val) => {
-  document.body.classList.toggle('theme-dark', val === true)
-  document.body.classList.toggle('theme-light', val === false)
+function applyBgColor(dist: number) {
+  const l = Math.round(Math.max(0, Math.min(255, 128 - dist * 0.85)))
+  currentBg = l
+  const h = l.toString(16).padStart(2, '0')
+  document.body.style.backgroundColor = `#${h}${h}${h}`
+  document.body.style.color = l < 128 ? '#e8eaf0' : '#111'
   dirty = true
-})
+}
+
+// border-radius: 動態注入 style 標籤，用 CSS 變數驅動
+let brStyleEl: HTMLStyleElement | null = null
+
+function applyRadius(dist: number) {
+  if (!brStyleEl) {
+    brStyleEl = document.createElement('style')
+    brStyleEl.textContent = '* { border-radius: var(--apollo-br) !important; transition: border-radius 0.15s !important; }'
+    document.head.appendChild(brStyleEl)
+  }
+  // dist 負 = 視覺上方，越遠 radius 越大；dist 正 = 下方，越遠越小
+  const br = Math.max(0, Math.min(16, 4 - dist * 0.06))
+  document.documentElement.style.setProperty('--apollo-br', `${br.toFixed(1)}px`)
+}
+
+// font-size: 快取元素，每次只更新 style（無 transition，拖曳本身提供平滑感）
+const FONT_SEL = 'h1,h2,h3,h4,h5,h6,p,a,li,span,button,label,td,th,figcaption,blockquote,nav'
+let fontCache: { el: HTMLElement; base: number }[] | null = null
+
+function applyFont(dist: number) {
+  if (!fontCache) {
+    fontCache = []
+    document.querySelectorAll<HTMLElement>(FONT_SEL).forEach(el => {
+      const base = parseFloat(window.getComputedStyle(el).fontSize)
+      if (base > 0) fontCache!.push({ el, base })
+    })
+  }
+  const scale = Math.max(0.93, Math.min(1.07, 1 - dist * 0.0004))
+  fontCache.forEach(({ el, base }) => { el.style.fontSize = `${(base * scale).toFixed(1)}px` })
+}
 
 const W = 340
 const H = 320
@@ -54,20 +88,38 @@ function onMouseDown(e: MouseEvent) {
   if (i >= 0) drag = { i, ox: mx - circles[i].x, oy: my - circles[i].y }
 }
 
-// 叉積方向判斷：(B-A) × (P-A) 的符號決定 P 在連線哪一側。
-// Canvas y 軸向下，故 cross < 0 = 視覺上方（true），cross > 0 = 視覺下方（false）。
 function checkOnLine() {
   const A = circles[0], B = circles[1], P = circles[2]
-  const cross = (B.x - A.x) * (P.y - A.y) - (B.y - A.y) * (P.x - A.x)
-  onLine.value = cross < 0
+  const abx = B.x - A.x, aby = B.y - A.y
+  const abLen = Math.sqrt(abx * abx + aby * aby)
+  if (abLen === 0) return
+  applyBgColor((abx * (P.y - A.y) - aby * (P.x - A.x)) / abLen)
+}
+
+function checkRadiusSide() {
+  const A = circles[0], B = circles[2], P = circles[1]
+  const abx = B.x - A.x, aby = B.y - A.y
+  const abLen = Math.sqrt(abx * abx + aby * aby)
+  if (abLen === 0) return
+  applyRadius((abx * (P.y - A.y) - aby * (P.x - A.x)) / abLen)
+}
+
+function checkFontSide() {
+  const A = circles[1], B = circles[2], P = circles[0]
+  const abx = B.x - A.x, aby = B.y - A.y
+  const abLen = Math.sqrt(abx * abx + aby * aby)
+  if (abLen === 0) return
+  applyFont((abx * (P.y - A.y) - aby * (P.x - A.x)) / abLen)
 }
 
 function onMouseMove(e: MouseEvent) {
   if (!drag) return
   const [mx, my] = toCanvas(e.clientX, e.clientY)
-  circles[drag.i].x = mx - drag.ox
-  circles[drag.i].y = my - drag.oy
+  circles[drag.i].x = Math.max(0, Math.min(W, mx - drag.ox))
+  circles[drag.i].y = Math.max(0, Math.min(H, my - drag.oy))
   if (drag.i === 2) checkOnLine()
+  if (drag.i === 1) checkRadiusSide()
+  if (drag.i === 0) checkFontSide()
   dirty = true
 }
 
@@ -86,9 +138,11 @@ function onTouchMove(e: TouchEvent) {
   if (!drag) return
   const t = e.touches[0]
   const [mx, my] = toCanvas(t.clientX, t.clientY)
-  circles[drag.i].x = mx - drag.ox
-  circles[drag.i].y = my - drag.oy
+  circles[drag.i].x = Math.max(0, Math.min(W, mx - drag.ox))
+  circles[drag.i].y = Math.max(0, Math.min(H, my - drag.oy))
   if (drag.i === 2) checkOnLine()
+  if (drag.i === 1) checkRadiusSide()
+  if (drag.i === 0) checkFontSide()
   dirty = true
 }
 
@@ -125,16 +179,17 @@ function draw() {
   const cvs = canvasRef.value
   if (!cvs) return
   const ctx = cvs.getContext('2d')!
-  const dark = onLine.value === true
+  const l = currentBg  // 0=黑 255=白
+  const inv = 255 - l  // 反色，用於筆觸與文字
 
   ctx.clearRect(0, 0, W, H)
-  ctx.fillStyle = dark ? '#0d0e12' : '#ffffff'
+  ctx.fillStyle = `rgb(${l},${l},${l})`
   ctx.fillRect(0, 0, W, H)
 
   // --- Layer 1: Three pairwise enclosing circles ---
   const pairs: [number, number][] = [[0, 1], [0, 2], [1, 2]]
   ctx.save()
-  ctx.strokeStyle = dark ? 'rgba(255,255,255,0.13)' : 'rgba(0,0,0,0.13)'
+  ctx.strokeStyle = `rgba(${inv},${inv},${inv},0.13)`
   ctx.lineWidth = 1
   for (const [i, j] of pairs) {
     const enc = enclosingCircle(circles[i], circles[j])
@@ -152,11 +207,11 @@ function draw() {
     ctx.save()
     ctx.beginPath()
     ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2)
-    ctx.fillStyle = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'
+    ctx.fillStyle = `rgba(${inv},${inv},${inv},0.06)`
     ctx.fill()
     ctx.strokeStyle = active
-      ? (dark ? 'rgba(255,255,255,0.9)' : 'rgba(0,0,0,0.7)')
-      : (dark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.25)')
+      ? `rgba(${inv},${inv},${inv},0.9)`
+      : `rgba(${inv},${inv},${inv},0.35)`
     ctx.lineWidth = 1.5
     ctx.stroke()
     ctx.restore()
@@ -164,7 +219,7 @@ function draw() {
     if (c.label) {
       ctx.save()
       ctx.font = '11px "Helvetica Neue", Helvetica, Arial, sans-serif'
-      ctx.fillStyle = dark ? 'rgba(255,255,255,0.55)' : 'rgba(0,0,0,0.45)'
+      ctx.fillStyle = `rgba(${inv},${inv},${inv},0.55)`
       ctx.textAlign = 'center'
       ctx.textBaseline = 'middle'
       ctx.fillText(c.label, c.x, c.y)
@@ -196,7 +251,12 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   cancelAnimationFrame(rafId)
-  document.body.classList.remove('theme-dark', 'theme-light')
+  document.body.style.removeProperty('background-color')
+  document.body.style.removeProperty('color')
+  brStyleEl?.remove(); brStyleEl = null
+  document.documentElement.style.removeProperty('--apollo-br')
+  fontCache?.forEach(({ el, base }) => { el.style.removeProperty('font-size') })
+  fontCache = null
   const cvs = canvasRef.value
   if (!cvs) return
   cvs.removeEventListener('mousedown', onMouseDown)
@@ -220,7 +280,7 @@ onBeforeUnmount(() => {
 <style scoped>
 .apollo-canvas {
   width: 100%;
-  height: auto;
+  aspect-ratio: 340 / 320;
   display: block;
   cursor: crosshair;
   touch-action: none;
@@ -228,16 +288,3 @@ onBeforeUnmount(() => {
 }
 </style>
 
-<style>
-body {
-  transition: background-color 0.4s, color 0.4s;
-}
-body.theme-dark {
-  background-color: #0d0e12;
-  color: #e8eaf0;
-}
-body.theme-light {
-  background-color: #ffffff;
-  color: #0d0e12;
-}
-</style>
