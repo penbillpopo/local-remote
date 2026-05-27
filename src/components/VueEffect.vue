@@ -100,6 +100,22 @@ function normalizeHref(href: string) {
   }
 }
 
+function getHashTarget(href: string) {
+  if (!href.startsWith('#')) return null;
+
+  const rawId = href.slice(1);
+  if (!rawId) return null;
+
+  try {
+    const decodedTarget = document.getElementById(decodeURIComponent(rawId));
+    if (decodedTarget) return decodedTarget;
+  } catch {
+    // Fall back to the raw hash when it is not valid percent-encoding.
+  }
+
+  return document.getElementById(rawId);
+}
+
 function isActiveLink(href: string) {
   return normalizeHref(href) === normalizeHref(activeTarget.value);
 }
@@ -127,12 +143,23 @@ function onLinkClick(event: MouseEvent, href: string) {
 
   if (!href.startsWith('#')) return;
 
-  const target = document.querySelector(href);
+  const target = getHashTarget(href);
   if (!target) return;
 
   event.preventDefault();
+  const previousHref = window.location.href;
   window.history.pushState(null, '', href);
-  setDisplayLevel(displayLevel.value);
+  updateCurrentHref();
+
+  if (window.location.href !== previousHref) {
+    window.dispatchEvent(
+      new HashChangeEvent('hashchange', {
+        oldURL: previousHref,
+        newURL: window.location.href,
+      })
+    );
+  }
+
   target.scrollIntoView({ block: 'start', behavior: 'smooth' });
 }
 
