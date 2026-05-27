@@ -87,7 +87,7 @@ const cards = [
       </div>
     </section>
 
-    <section class="playground-grid">
+    <section id="projects" class="playground-grid">
       <article v-for="card in cards" :key="card.title" class="playground-card">
         <div>
           <p>{{ card.eyebrow }}</p>
@@ -97,17 +97,17 @@ const cards = [
       </article>
     </section>
 
-    <section class="playground-band playground-band--pink">
+    <section id="fragments" class="playground-band playground-band--pink">
       <p>Fragments</p>
       <h2>Scroll direction controls the dock.</h2>
     </section>
 
-    <section class="playground-band playground-band--dark">
+    <section id="news" class="playground-band playground-band--dark">
       <p>News</p>
       <h2>Down shows one block. Up in the middle shows two.</h2>
     </section>
 
-    <section class="playground-band playground-band--light">
+    <section id="about" class="playground-band playground-band--light">
       <p>About</p>
       <h2>At the top, the introduction returns for three blocks.</h2>
     </section>
